@@ -56,6 +56,16 @@ pipeline:
     deployment_state: "created"
     secrets: [ plugin_endpoint, plugin_username, plugin_password]
 
+    install_spark_history_server:
+      image: banzaicloud/plugin-pipeline-client:dev-e09a0b4
+
+      deployment_name: "spark-hs"
+      deployment_release_name: "spark-hs"
+      deployment_values:
+        app:
+          logDirectory: s3a://spark-k8-logs/eventLog"
+      secrets: [ plugin_endpoint, plugin_username, plugin_password]    
+
   run:
     image: banzaicloud/k8s-proxy:0.1.0
     original_image: banzaicloud/spark-submit-k8s:0.1.0
@@ -78,6 +88,8 @@ pipeline:
     spark_kubernetes_shuffle_labels: "app=spark-shuffle-service,spark-version=2.2.0"
     spark_kubernetes_authenticate_driver_serviceaccount_name: "spark"
     spark_metrics_conf: /opt/spark/conf/metrics.properties
+    spark.eventLog.dir: "s3a://spark-k8-logs/eventLog"
+    spark.eventLog.enabled: true
     spark_packages: "org.apache.hadoop:hadoop-aws:2.7.2,\
         com.amazonaws:aws-java-sdk:1.7.4,\
         com.typesafe.scala-logging:scala-logging_2.11:3.1.0,\
