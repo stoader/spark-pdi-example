@@ -1,64 +1,57 @@
 pipeline:
   create_cluster:
-    image: banzaicloud/pipeline-client:0.1.0
-    log_level: info
-    log_format: text
+    image: banzaicloud/plugin-pipeline-client:0.2.0
+# AWS
+    cluster_name: "lppdi04"
+    cluster_provider: "azure"
+    cluster_location: "eastus"
+# If you want to start cluster on Azure Cloud
+# Change cluster_provider to "azure" and setting up "azure_resource_group"
+# https://docs.microsoft.com/en-us/azure/azure-resource-manager/xplat-cli-azure-resource-manager
+    azure_resource_group: "pl_eastus"
 
-    cluster_name: "spark-pdi-cluster"
-    cluster_location: "eu-west-1"
-    cluster_state: "created"
-
-    node_image: ami-294ffd50
-    node_instance_type: m4.xlarge
-    node_spot_price: 0.2
-    node_min_count: 1
-    node_max_count: 2
-
-    master_image: ami-294ffd50
-    master_instance_type: m4.xlarge
-
-    deployment_name: "pipeline-cluster-monitor"
+# Please set up these secrets on the CI/CD ui
+    secrets: [endpoint, username, password]
+ 
+    deployment_name: "banzaicloud-stable/pipeline-cluster-monitor"
     deployment_release_name: "monitor"
-    deployment_state: "created"
 
-    secrets: [ plugin_endpoint, plugin_username, plugin_password]
+  install_spark_history_server:
+    image: banzaicloud/plugin-pipeline-client:0.2.0
+
+    deployment_name: "banzaicloud-stable/spark-hs"
+    deployment_release_name: "historyserver"
+    deployment_values:
+      app:
+        logDirectory: "wasb://spark-k8-logs@{{ .AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/eventLog"
+        azureStorageAccountName: "{{ .AZURE_STORAGE_ACCOUNT }}"
+        azureStorageAccessKey: "{{ .AZURE_STORAGE_ACCOUNT_ACCESS_KEY }}"
+    
+    secrets: [endpoint, username, password, azure_storage_account, azure_storage_account_access_key, lofasz]
 
   remote_checkout:
-    image: banzaicloud/k8s-proxy:0.1.0
+    image: banzaicloud/plugin-k8s-proxy:0.2.0
     original_image: plugins/git
 
   remote_build:
-    image: banzaicloud/k8s-proxy:0.1.0
+    image: banzaicloud/plugin-k8s-proxy:0.2.0
     original_image: denvazh/scala:2.11.8
     original_commands:
       - sbt clean package
 
   prepare_spark_deps:
-    image: banzaicloud/pipeline-client:0.1.0
+    image: banzaicloud/plugin-pipeline-client:0.2.0
     log_level: info
     log_format: text
 
-    cluster_name: "spark-pdi-cluster"
-    cluster_location: "eu-west-1"
-    cluster_state: "created"
-
-    node_image: ami-294ffd50
-    node_instance_type: m4.xlarge
-    node_spot_price: 0.2
-    node_min_count: 1
-    node_max_count: 2
-
-    master_image: ami-294ffd50
-    master_instance_type: m4.xlarge
-
-    deployment_name: "spark"
+    deployment_name: "banzaicloud-stable/spark"
     deployment_release_name: "spark"
-    deployment_state: "created"
-    secrets: [ plugin_endpoint, plugin_username, plugin_password]
 
+    secrets: [endpoint, username, password]
+        
   run:
-    image: banzaicloud/k8s-proxy:0.1.0
-    original_image: banzaicloud/spark-submit-k8s:0.1.0
+    image: banzaicloud/plugin-k8s-proxy:0.2.0
+    original_image: banzaicloud/plugin-spark-submit-k8s:0.2.0
     pod_service_account: spark
     pull: true
     spark_deploy_mode: cluster
@@ -67,9 +60,9 @@ pipeline:
     spark_kubernetes_namespace: default
     spark_app_name: SFPDIncidents
     spark_local_dir: /tmp/spark-local
-    spark_kubernetes_driver_docker_image: banzaicloud/spark-driver:v2.2.0-k8s-1.0.179
-    spark_kubernetes_executor_docker_image: banzaicloud/spark-executor:v2.2.0-k8s-1.0.179
-    spark_kubernetes_initcontainer_docker_image: banzaicloud/spark-init:v2.2.0-k8s-1.0.179
+    spark_kubernetes_driver_docker_image: banzaicloud/spark-driver:v2.2.0-k8s-1.0.197
+    spark_kubernetes_executor_docker_image: banzaicloud/spark-executor:v2.2.0-k8s-1.0.197
+    spark_kubernetes_initcontainer_docker_image: banzaicloud/spark-init:v2.2.0-k8s-1.0.197
     spark_dynamic_allocation: true
     spark_kubernetes_resourcestagingserver_uri: http://spark-rss:10000
     spark_kubernetes_resourcestagingserver_internal_uri: http://spark-rss:10000
@@ -78,12 +71,12 @@ pipeline:
     spark_kubernetes_shuffle_labels: "app=spark-shuffle-service,spark-version=2.2.0"
     spark_kubernetes_authenticate_driver_serviceaccount_name: "spark"
     spark_metrics_conf: /opt/spark/conf/metrics.properties
-    spark_packages: "org.apache.hadoop:hadoop-aws:2.7.2,\
-        com.amazonaws:aws-java-sdk:1.7.4,\
-        com.typesafe.scala-logging:scala-logging_2.11:3.1.0,\
-        ch.qos.logback:logback-classic:1.1.2"
-    spark_exclude_packages: "com.fasterxml.jackson.core:jackson-databind,\
-        com.fasterxml.jackson.core:jackson-annotations,\
-        com.fasterxml.jackson.core:jackson-core"
+    spark_eventLog_dir: "wasb://spark-k8-logs@sparklogstore.blob.core.windows.net/eventLog"
+    spark_eventLog_enabled: true
+    spark_packages: org.apache.hadoop:hadoop-aws:2.7.2,com.amazonaws:aws-java-sdk:1.7.4,com.typesafe.scala-logging:scala-logging_2.11:3.1.0,ch.qos.logback:logback-classic:1.1.2
+    spark_exclude_packages: com.fasterxml.jackson.core:jackson-databind,com.fasterxml.jackson.core:jackson-annotations,com.fasterxml.jackson.core:jackson-core
     spark_app_source: target/scala-2.11/sf-police-incidents_2.11-0.1.jar
-    spark_app_args: --dataPath s3a://lp-deps-test/data/Police_Department_Incidents.csv
+    spark_app_args: --dataPath wasb://pdidata@sparklogstore.blob.core.windows.net/Police_Department_Incidents.csv
+    
+    secrets: [plugin_azure_storage_account, plugin_azure_storage_account_access_key]
+   
