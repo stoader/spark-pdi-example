@@ -6,7 +6,8 @@ pipeline:
 
     secrets: [plugin_endpoint, plugin_username, plugin_password]
 
-  install_monitoring
+  install_monitoring:
+    image: banzaicloud/plugin-pipeline-client:0.2.0
     deployment_name: "banzaicloud-stable/pipeline-cluster-monitor"
     deployment_release_name: "monitor"
 
@@ -18,12 +19,12 @@ pipeline:
     deployment_name: "banzaicloud-stable/spark-hs"
     deployment_release_name: "historyserver"
     deployment_values:
-    app:
-      logDirectory: s3a://spark-k8-logs/eventLog
+      app:
+        logDirectory: s3a://spark-k8-logs/eventLog
 
     secrets: [plugin_endpoint, plugin_username, plugin_password, plugin_azure_storage_account, plugin_azure_storage_account_access_key]
 
-  install_spark_resources
+  install_spark_resources:
     image: banzaicloud/plugin-pipeline-client:0.2.0
 
     deployment_name: "banzaicloud-stable/spark"
@@ -57,6 +58,6 @@ pipeline:
     spark_kubernetes_authenticate_driver_serviceaccount_name: "spark"
     spark_metrics_conf: /opt/spark/conf/metrics.properties
     spark_eventLog_enabled: true
-    spark.eventLog.dir: "s3a://spark-k8-logs/eventLog"
+    spark_eventLog_dir: "s3a://spark-k8-logs/eventLog"
     spark_app_source: target/scala-2.11/sf-police-incidents_2.11-0.1.jar
     spark_app_args: --dataPath s3a://lp-deps-test/data/Police_Department_Incidents.csv

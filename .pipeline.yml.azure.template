@@ -8,7 +8,8 @@ pipeline:
 
     secrets: [plugin_endpoint, plugin_username, plugin_password]
 
-  install_monitoring
+  install_monitoring:
+    image: banzaicloud/plugin-pipeline-client:0.2.0
     deployment_name: "banzaicloud-stable/pipeline-cluster-monitor"
     deployment_release_name: "monitor"
     deployment_values:
@@ -31,7 +32,7 @@ pipeline:
 
     secrets: [plugin_endpoint, plugin_username, plugin_password, plugin_azure_storage_account, plugin_azure_storage_account_access_key]
 
-  install_spark_resources
+  install_spark_resources:
     image: banzaicloud/plugin-pipeline-client:0.2.0
 
     deployment_name: "banzaicloud-stable/spark"
