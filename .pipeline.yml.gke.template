@@ -1,40 +1,35 @@
 pipeline:
   create_cluster:
     image: banzaicloud/plugin-pipeline-client:latest
-    cluster_name: "pdicluster01"
+    cluster_name: "[[cluster-name]]"
     cluster_provider: "google"
-    google_project: "puski-test-194413"
+    google_project: "[[gke-project-id]]"
     google_gke_version: "1.8.7-gke.1"
     google_node_count: "2"
-    google_service_account: "lp-sa-580@puski-test-194413.iam.gserviceaccount.com"
+    google_service_account: "[[gke-service-account]]"
     log_level: "debug"
-
     secrets: [plugin_endpoint, plugin_token]
 
   install_monitoring:
     image: banzaicloud/plugin-pipeline-client:latest
     deployment_name: "banzaicloud-stable/pipeline-cluster-monitor"
     deployment_release_name: "monitor"
-
     secrets: [plugin_endpoint, plugin_token]
 
   install_spark_history_server:
     image: banzaicloud/plugin-pipeline-client:latest
-
     deployment_name: "banzaicloud-stable/spark-hs"
     deployment_release_name: "historyserver"
     deployment_values:
       app:
-        logDirectory: "gs://puski-testing/data"
+        logDirectory: "gs://[[storage-bucket/folder]]"
 
     secrets: [plugin_endpoint, plugin_token]
 
   install_spark_resources:
      image: banzaicloud/plugin-pipeline-client:latest
-
      deployment_name: "banzaicloud-stable/spark"
      deployment_release_name: "release-1"
-
      secrets: [plugin_endpoint, plugin_token]
 
   remote_checkout:
@@ -71,7 +66,7 @@ pipeline:
       spark.kubernetes.authenticate.driver.serviceAccountName: spark
       spark.metrics.conf: /opt/spark/conf/metrics.properties
       spark.eventLog.enabled: "true"
-      spark.eventLog.dir: "gs://puski-testing/data"
+      spark.eventLog.dir: "gs://[[storage-bucket/folder]]"
     spark_submit_app_args:
       - target/scala-2.11/sf-police-incidents_2.11-0.1.jar
       - --dataPath "gs://puski-testing/pdidata/Police_Department_Incidents.csv"
