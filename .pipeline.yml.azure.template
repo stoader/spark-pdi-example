@@ -51,9 +51,9 @@ pipeline:
     spark_submit_configs:
       spark.app.name: sparkpi
       spark.local.dir: /tmp/spark-locals
-      spark.kubernetes.driver.docker.image: banzaicloud/spark-driver:v2.2.0-k8s-1.0.210
-      spark.kubernetes.executor.docker.image: banzaicloud/spark-executor:v2.2.0-k8s-1.0.210
-      spark.kubernetes.initcontainer.docker.image: banzaicloud/spark-init:v2.2.0-k8s-1.0.210
+      spark.kubernetes.driver.docker.image: banzaicloud/spark-driver:v2.2.1-k8s-1.0.8
+      spark.kubernetes.executor.docker.image: banzaicloud/spark-executor:v2.2.1-k8s-1.0.8
+      spark.kubernetes.initcontainer.docker.image: banzaicloud/spark-init:v2.2.1-k8s-1.0.8
       spark.dynamicAllocation.enabled: "true"
       spark.kubernetes.resourceStagingServer.uri: http://spark-rss:10000
       spark.kubernetes.resourceStagingServer.internal.uri: http://spark-rss:10000
