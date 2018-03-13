@@ -3,23 +3,27 @@ pipeline:
     image: banzaicloud/plugin-pipeline-client:latest
     cluster_name: "[[your-cluster-name]]"
     cluster_provider: "amazon"
+
     secrets: [plugin_endpoint, plugin_token]
 
   install_monitoring:
+    image: banzaicloud/plugin-pipeline-client:latest
     deployment_name: "banzaicloud-stable/pipeline-cluster-monitor"
     deployment_release_name: "monitor"
+
     secrets: [plugin_endpoint, plugin_token]
 
   install_spark_resources:
     image: banzaicloud/plugin-pipeline-client:latest
+
     deployment_name: "banzaicloud-stable/spark"
-    deployment_release_name: "release-1"
     deployment_values:
       historyServer:
         enabled: true
       spark-hs:
         app:
           logDirectory: "s3a://[[your-s3-bucket/your-log-folder]]"
+
     secrets: [plugin_endpoint, plugin_token]
 
   remote_checkout:

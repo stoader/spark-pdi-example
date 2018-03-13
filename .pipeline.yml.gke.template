@@ -1,36 +1,33 @@
 pipeline:
   create_cluster:
     image: banzaicloud/plugin-pipeline-client:latest
-    cluster_name: "[[cluster-name]]"
+    cluster_name: "[[your-cluster-name]]"
     cluster_provider: "google"
-    google_project: "[[gke-project-id]]"
+    google_project: "[[your-google-project]]"
     google_gke_version: "1.8.7-gke.1"
     google_node_count: "2"
-    google_service_account: "[[gke-service-account]]"
-    log_level: "debug"
+
     secrets: [plugin_endpoint, plugin_token]
 
   install_monitoring:
     image: banzaicloud/plugin-pipeline-client:latest
     deployment_name: "banzaicloud-stable/pipeline-cluster-monitor"
     deployment_release_name: "monitor"
-    secrets: [plugin_endpoint, plugin_token]
-
-  install_spark_history_server:
-    image: banzaicloud/plugin-pipeline-client:latest
-    deployment_name: "banzaicloud-stable/spark-hs"
-    deployment_release_name: "historyserver"
-    deployment_values:
-      app:
-        logDirectory: "gs://[[storage-bucket/folder]]"
 
     secrets: [plugin_endpoint, plugin_token]
 
   install_spark_resources:
-     image: banzaicloud/plugin-pipeline-client:latest
-     deployment_name: "banzaicloud-stable/spark"
-     deployment_release_name: "release-1"
-     secrets: [plugin_endpoint, plugin_token]
+    image: banzaicloud/plugin-pipeline-client:latest
+
+    deployment_name: "banzaicloud-stable/spark"
+    deployment_values:
+     historyServer:
+        enabled: true
+     spark-hs:
+       app:
+         logDirectory: "gs://your-gs-bucket/your-folder"
+
+    secrets: [plugin_endpoint, plugin_token]
 
   remote_checkout:
     image: banzaicloud/drone-plugin-k8s-client:latest
