@@ -3,6 +3,7 @@ pipeline:
     image: banzaicloud/plugin-pipeline-client:0.3.0
     cluster_name: "Seba-CICD-1"
     cluster_provider: "amazon"
+    loglevel: "debug"
 
     secrets: [plugin_endpoint, plugin_token]
 
