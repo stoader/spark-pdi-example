@@ -42,10 +42,11 @@ pipeline:
     proxy_service_account: spark
 
     spark_submit_options:
-      class: banzaicloud.SparkPi
+      class: com.banzaicloud.sfdata.SFPDIncidents
       kubernetes-namespace: default
+      packages: com.typesafe.scala-logging:scala-logging_2.11:3.1.0,ch.qos.logback:logback-classic:1.1.2
     spark_submit_configs:
-      spark.app.name: sparkpi
+      spark.app.name: SFPDIncidents
       spark.local.dir: /tmp/spark-locals
       spark.kubernetes.driver.docker.image: banzaicloud/spark-driver:v2.2.1-k8s-1.0.8
       spark.kubernetes.executor.docker.image: banzaicloud/spark-executor:v2.2.1-k8s-1.0.8
