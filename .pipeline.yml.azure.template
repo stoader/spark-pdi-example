@@ -23,7 +23,7 @@ pipeline:
         enabled: true
       spark-hs:
         app:
-          logDirectory: "wasb://spark-k8-logs@{{ .PLUGIN_AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/eventLog"
+          logDirectory: "wasb://[[your-storage-container]]@{{ .PLUGIN_AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/[[your-log-folder]]"
           azure_storage_account: "{{ .PLUGIN_AZURE_STORAGE_ACCOUNT }}"
           azure_storage_account_access_key: "{{ .PLUGIN_AZURE_STORAGE_ACCOUNT_ACCESS_KEY }}"
     secrets: [plugin_endpoint, plugin_token, plugin_azure_storage_account, plugin_azure_storage_account_access_key]
@@ -44,10 +44,11 @@ pipeline:
     proxy_service_account: spark
 
     spark_submit_options:
-      class: banzaicloud.SparkPi
+      class: com.banzaicloud.sfdata.SFPDIncidents
       kubernetes-namespace: default
+      packages: com.typesafe.scala-logging:scala-logging_2.11:3.1.0,ch.qos.logback:logback-classic:1.1.2
     spark_submit_configs:
-      spark.app.name: sparkpi
+      spark.app.name: SFPDIncidents
       spark.local.dir: /tmp/spark-locals
       spark.kubernetes.driver.docker.image: banzaicloud/spark-driver:v2.2.1-k8s-1.0.8
       spark.kubernetes.executor.docker.image: banzaicloud/spark-executor:v2.2.1-k8s-1.0.8
@@ -61,8 +62,8 @@ pipeline:
       spark.kubernetes.authenticate.driver.serviceAccountName: spark
       spark.metrics.conf: /opt/spark/conf/metrics.properties
       spark.eventLog.enabled: "true"
-      spark.eventLog.dir: "wasb://spark-k8-logs@sparklogstore.blob.core.windows.net/eventLog"
-      spark_submit_app_args:
+      spark.eventLog.dir: "wasb://[[your-storage-container]]@{{ .PLUGIN_AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/[[your-log-folder]]"
+    spark_submit_app_args:
       - target/scala-2.11/sf-police-incidents_2.11-0.1.jar
       - --dataPath wasb://pdidata@sparklogstore.blob.core.windows.net/Police_Department_Incidents.csv
 
