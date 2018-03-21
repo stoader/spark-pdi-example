@@ -1,9 +1,10 @@
 pipeline:
   create_cluster:
     image: banzaicloud/plugin-pipeline-client:0.3.0
-    cluster_name: "sebaawscicd10"
+    cluster_name: "sebaawscicd11"
     cluster_provider: "amazon"
-    amazon_node_mincount: "2"
+    amazon_node_min_count: "2"
+    amazon_node_max_count: "3"
 
     secrets: [plugin_endpoint, plugin_token]
 
