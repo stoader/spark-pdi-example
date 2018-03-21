@@ -18,6 +18,7 @@ pipeline:
     image: banzaicloud/plugin-pipeline-client:0.3.0
 
     deployment_name: "banzaicloud-stable/spark"
+    deployment_release_name: "release-1"
     deployment_values:
       historyServer:
         enabled: true
